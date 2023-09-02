@@ -23,11 +23,11 @@ def extract_nyf():
     new_movies = []
     for _file in os.listdir(FOLDER):
         try:
-            ext = re.findall(r'\.[^.]*$', _file)[0]
+            ext = re.findall(r'\.[^.]*$', _file)[0][1:]
         except:
-            pass
-        if ext != '.mkv':
-            pass
+            continue
+        if ext != 'mkv':
+            continue
         try:
             name = re.findall(patron_t, _file)[0]
             name = name[:-1].replace('.', ' ')
