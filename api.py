@@ -2,13 +2,12 @@ import requests
 from password import *
 import pandas as pd
 from datetime import datetime
+import time
 
 """
 Funciones consulta API TMDB
 
 """
-
-scan = pd.read_parquet('scan.parquet')
 
 headers = {"accept": "application/json", "Authorization": f"Bearer {TOKEN}"}
 
@@ -73,7 +72,13 @@ def get_cast(TMDB_id):
             response['cast'][i]['profile_path']
         lst.append(dictio)
 
-    return pd.DataFrame(lst)
+    df = pd.DataFrame(lst)
+    actors = pd.read_parquet('actors.parquet')
+    actors = pd.concat(
+        [actors, df], axis=0).drop_duplicates().reset_index(drop=True)
+    actors.to_parquet('actors.parquet', engine='pyarrow')
+
+    return df
 
 
 def get_director_writer(TMDB_id):
@@ -82,7 +87,7 @@ def get_director_writer(TMDB_id):
 
     response = requests.get(url, headers=headers).json()
 
-    df = pd.DataFrame(response)
+    df = pd.DataFrame(response['crew'])
 
     dictio = dict()
     dictio['Director'] = df[df.job == 'Director']['name'].to_list()
@@ -100,3 +105,34 @@ def get_video(TMDB_id):
     video = 'https://www.youtube.com/watch?v=' + response['results'][0]['key']
 
     return video
+
+
+def get_data(TMDB_id):
+    """
+    Función que une toda la información extraida de la API
+    """
+
+    dictio = get_details(TMDB_id)
+    dictio['Reparto'] = get_cast(TMDB_id)['Id'].to_list()
+    dictio = {**dictio, **get_director_writer(TMDB_id)}
+    dictio['Video'] = get_video(TMDB_id)
+
+    return dictio
+
+
+def save_data():
+
+    scan = pd.read_parquet('scan.parquet')
+    files = scan[scan.API_pass == False]
+
+    lst = []
+    for i in files.itertuples():
+        time.sleep(0.03)
+        try:
+            TMDB_id = search_id(i[1], i[2])
+        except:
+            continue
+        dictio = get_data(TMDB_id)
+        dictio['File'] = i[4]
+        lst.append(dictio)
+        # Modificar bool de scan

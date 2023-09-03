@@ -49,7 +49,7 @@ def extract_nyf():
         except:
             year = ''
 
-        new_movies.append((name, year, ext, _file))
+        new_movies.append((name, year, ext, _file, False))
 
     return new_movies
 
@@ -58,6 +58,7 @@ def insert_scan():
     """
     Función para insertar nueva información en scan.parquet 
     """
+    scan = pd.read_parquet('scan.parquet')
 
     extract = pd.DataFrame(extract_nyf(), columns=scan.columns)
 

@@ -3,6 +3,7 @@ password.py
 /pelis
 draft.ipynb
 scan.parquet
+actors.parquet
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
