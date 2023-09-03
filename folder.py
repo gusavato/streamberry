@@ -21,13 +21,15 @@ def extract_nyf():
     # Patron regex para extraer el título
     patron_t = r"^(.*?)(?=\()"
 
+    # Cargamos df donde se registran los archivos de FOLDER
     scan = pd.read_parquet('scan.parquet')
 
+    # Establecemos que se revisen solo los ficheros no registrados
     set_1 = set(scan.File)
     set_2 = set(os.listdir(FOLDER))
-
     set_to_scan = set_2.difference(set_1)
 
+    # Extraemos información
     new_movies = []
     for _file in set_to_scan:
 
