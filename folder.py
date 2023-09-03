@@ -1,5 +1,6 @@
 import os
 import re
+import pandas as pd
 from password import FOLDER
 
 """
@@ -20,13 +21,21 @@ def extract_nyf():
     # Patron regex para extraer el título
     patron_t = r"^(.*?)(?=\()"
 
+    scan = pd.read_parquet('scan.parquet')
+
+    set_1 = set(scan.File)
+    set_2 = set(os.listdir(FOLDER))
+
+    set_to_scan = set_2.difference(set_1)
+
     new_movies = []
-    for _file in os.listdir(FOLDER):
+    for _file in set_to_scan:
+
         try:
             ext = re.findall(r'\.[^.]*$', _file)[0][1:]
         except:
             continue
-        if ext != 'mkv':
+        if ext not in ['mkv', 'avi']:
             continue
         try:
             name = re.findall(patron_t, _file)[0]
