@@ -52,3 +52,20 @@ def extract_nyf():
         new_movies.append((name, year, ext, _file))
 
     return new_movies
+
+
+def insert_scan():
+    """
+    Función para insertar nueva información en scan.parquet 
+    """
+
+    extract = pd.DataFrame(extract_nyf(), columns=scan.columns)
+
+    if extract.empty:
+        return None
+
+    scan = pd.read_parquet('scan.parquet')
+
+    scan = pd.concat([scan, extract], axis=0).reset_index(drop=True)
+
+    scan.to_parquet('scan.parquet', engine='pyarrow')
