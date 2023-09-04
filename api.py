@@ -68,8 +68,11 @@ def get_cast(TMDB_id):
         dictio = dict()
         dictio['Id'] = response['cast'][i]['id']
         dictio['Nombre'] = response['cast'][i]['name']
-        dictio['Foto'] = 'https://image.tmdb.org/t/p/w200' + \
-            response['cast'][i]['profile_path']
+        try:
+            dictio['Foto'] = 'https://image.tmdb.org/t/p/w200' + \
+                response['cast'][i]['profile_path']
+        except:
+            dictio['Foto'] = ''
         lst.append(dictio)
 
     df = pd.DataFrame(lst)
@@ -102,7 +105,11 @@ def get_video(TMDB_id):
 
     response = requests.get(url, headers=headers).json()
 
-    video = 'https://www.youtube.com/watch?v=' + response['results'][0]['key']
+    try:
+        video = 'https://www.youtube.com/watch?v=' + \
+            response['results'][0]['key']
+    except:
+        return ''
 
     return video
 
@@ -121,18 +128,33 @@ def get_data(TMDB_id):
 
 
 def save_data():
+    """
+    Función que almacena la nueva información en films.parquet
+
+    """
 
     scan = pd.read_parquet('scan.parquet')
     files = scan[scan.API_pass == False]
 
     lst = []
     for i in files.itertuples():
-        time.sleep(0.03)
         try:
             TMDB_id = search_id(i[1], i[2])
         except:
             continue
         dictio = get_data(TMDB_id)
+        dictio['Folder'] = 0
         dictio['File'] = i[4]
+        dictio['Vista'] = False
         lst.append(dictio)
-        # Modificar bool de scan
+        scan.loc[i[0], 'API_pass'] = True
+
+    scan.to_parquet('scan.parquet', engine='pyarrow')
+
+    films = pd.read_parquet('films.parquet')
+
+    new = pd.DataFrame(lst)
+
+    films = pd.concat([films, new], axis=0).reset_index(drop=True)
+
+    films.to_parquet('films.parquet', engine='pyarrow')
