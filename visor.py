@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 
+# Funciones botones
+
 
 def click_back():
     global films
@@ -18,10 +20,14 @@ def click_fowd():
     st.session_state.box = films.loc[index + 1, 'Titulo']
 
 
+# Configuración página
 st.set_page_config(layout='wide')
 
+# Cargamos df
 films = pd.read_parquet('films.parquet')
 actors = pd.read_parquet('actors.parquet')
+
+# Sidebar
 
 selec = st.sidebar.selectbox(
     'Título', options=films.Titulo, key='box')
@@ -35,9 +41,15 @@ with sd_col1:
 with sd_col2:
     fowd = st.button(label=':arrow_forward:', on_click=click_fowd)
 
+# Establecemos selección
+
 selec_film = films[films['Titulo'] == st.session_state.box]
 
 st.sidebar.image(selec_film.Poster.values[0])
+
+st.sidebar.slider(label='Año', min_value=films.Year.min(),
+                  max_value=films.Year.max(), key='slider',
+                  value=[films.Year.min(), films.Year.max()])
 
 
 st.markdown(
@@ -140,3 +152,4 @@ with col_5:
                         unsafe_allow_html=True)
 
 st.write(selec_film)
+st.write(st.session_state.slider)
