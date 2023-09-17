@@ -146,6 +146,7 @@ def save_data():
         dictio['Folder'] = 0
         dictio['File'] = i[4]
         dictio['Vista'] = False
+        dictio['Add'] = datetime.today().date().strftime('%d-%m-%Y')
         lst.append(dictio)
         scan.loc[i[0], 'API_pass'] = True
 

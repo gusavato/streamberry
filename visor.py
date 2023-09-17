@@ -5,34 +5,48 @@ import pandas as pd
 
 
 def click_back():
-    global films
-    index = films[films['Titulo'] == selec].index.to_list()[0]
+    global df_selec
+    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[0]
     if index == 0:
-        index = films.shape[0]
-    st.session_state.box = films.loc[index - 1, 'Titulo']
+        index = df_selec.shape[0]
+    st.session_state.box = df_selec.loc[index - 1, 'Titulo']
 
 
 def click_fowd():
-    global films
-    index = films[films['Titulo'] == selec].index.to_list()[0]
-    if index == films.shape[0]-1:
+    global df_selec
+    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[0]
+    if index == df_selec.shape[0]-1:
         index = -1
-    st.session_state.box = films.loc[index + 1, 'Titulo']
+    st.session_state.box = df_selec.loc[index + 1, 'Titulo']
 
 
 # Configuración página
 st.set_page_config(layout='wide')
 
 # Cargamos df
-films = pd.read_parquet('films.parquet')
+films = pd.read_parquet('films.parquet').sort_index(ascending=False)
 actors = pd.read_parquet('actors.parquet')
 
 # Sidebar
 
+# Excepciones valores filtros
+# Excepción año
+try:
+    year_min, year_max = st.session_state.slider
+
+except:
+    year_min = films.Year.min()
+    year_max = films.Year.max()
+
+# Dataset aplicado filtros
+df_selec = films[(films['Year'] <= year_max) &
+                 (films['Year'] >= year_min)].reset_index(drop=True)
+
+
 selec = st.sidebar.selectbox(
-    'Título', options=films.Titulo, key='box')
+    'Título', options=df_selec.Titulo, key='box')
 
-
+# Sidebar: botones Next / Foward
 sd_col1, sd_col2 = st.sidebar.columns(2)
 
 with sd_col1:
@@ -41,16 +55,21 @@ with sd_col1:
 with sd_col2:
     fowd = st.button(label=':arrow_forward:', on_click=click_fowd)
 
-# Establecemos selección
+# Definimos selección
 
 selec_film = films[films['Titulo'] == st.session_state.box]
 
 st.sidebar.image(selec_film.Poster.values[0])
 
-st.sidebar.slider(label='Año', min_value=films.Year.min(),
-                  max_value=films.Year.max(), key='slider',
-                  value=[films.Year.min(), films.Year.max()])
+# Filtros
 
+# Filtro año
+slider_year = st.sidebar.slider(label='Año', min_value=films.Year.min(),
+                                max_value=films.Year.max(), key='slider',
+                                value=[films.Year.min(), films.Year.max()])
+
+
+# PAGINA PRINCIPAL
 
 st.markdown(
     f"""
@@ -153,3 +172,4 @@ with col_5:
 
 st.write(selec_film)
 st.write(st.session_state.slider)
+st.write(slider_year)
