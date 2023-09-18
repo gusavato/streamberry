@@ -159,3 +159,16 @@ def save_data():
     films = pd.concat([films, new], axis=0).reset_index(drop=True)
 
     films.to_parquet('films.parquet', engine='pyarrow')
+
+
+def solve_data(index, TMDB_id):
+    films = pd.read_parquet('films.parquet')
+    dictio = get_data(TMDB_id)
+    dictio['Folder'] = 0
+    dictio['File'] = films.loc[index, 'File']
+    dictio['Vista'] = films.loc[index, 'Vista']
+    dictio['Add'] = films.loc[index, 'Add']
+
+    films.loc[index, :] = dictio
+
+    films.to_parquet('films.parquet', engine='pyarrow')
