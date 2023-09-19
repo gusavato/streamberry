@@ -72,6 +72,13 @@ try:
 except:
     gen_var = films.Genero.explode().sort_values().unique()
 
+# Excepción nota
+try:
+    nota_min, nota_max = st.session_state.nota
+
+except:
+    nota_min = 0
+    nota_max = 10
 
 # Excepción duracion
 try:
@@ -96,6 +103,14 @@ try:
 
 except:
     toog = False
+
+# Excepción sort
+try:
+    check_sort = st.session_state.sort
+
+except:
+    check_sort = False
+
 # Dataset aplicado filtros
 
 if toog:
@@ -106,7 +121,9 @@ if text_search == '':
                      (films['Year'] >= year_min) &
                      (films['Duracion'] >= time_min) &
                      (films['Duracion'] <= time_max) &
-                     (films['Genero'].apply(lambda x: any(item in gen_var for item in x)))].reset_index(drop=True)
+                     (films['Genero'].apply(lambda x: any(item in gen_var for item in x))) &
+                     (films['TMDB_rate'] >= nota_min) &
+                     (films['TMDB_rate'] <= nota_max)].reset_index(drop=True)
 
 else:
     if selec_search == 'Titulo':
@@ -116,7 +133,9 @@ else:
                          (films['Year'] >= year_min) &
                          (films['Duracion'] >= time_min) &
                          (films['Duracion'] <= time_max) &
-                         (films['Genero'].apply(lambda x: any(item in gen_var for item in x)))].reset_index(drop=True)
+                         (films['Genero'].apply(lambda x: any(item in gen_var for item in x))) &
+                         (films['TMDB_rate'] >= nota_min) &
+                         (films['TMDB_rate'] <= nota_max)].reset_index(drop=True)
 
     elif selec_search == 'Reparto':
 
@@ -128,7 +147,9 @@ else:
                          (films['Year'] >= year_min) &
                          (films['Duracion'] >= time_min) &
                          (films['Duracion'] <= time_max) &
-                         (films['Genero'].apply(lambda x: any(item in gen_var for item in x)))].reset_index(drop=True)
+                         (films['Genero'].apply(lambda x: any(item in gen_var for item in x))) &
+                         (films['TMDB_rate'] >= nota_min) &
+                         (films['TMDB_rate'] <= nota_max)].reset_index(drop=True)
 
     elif selec_search == 'Director':
 
@@ -137,13 +158,19 @@ else:
                          (films['Year'] >= year_min) &
                          (films['Duracion'] >= time_min) &
                          (films['Duracion'] <= time_max) &
-                         (films['Genero'].apply(lambda x: any(item in gen_var for item in x)))].reset_index(drop=True)
+                         (films['Genero'].apply(lambda x: any(item in gen_var for item in x))) &
+                         (films['TMDB_rate'] >= nota_min) &
+                         (films['TMDB_rate'] <= nota_max)].reset_index(drop=True)
 
 
 # Excepción por si df_selec está vacío
 if df_selec.empty:
     df_selec = films
     st.sidebar.write('Sin resultados en la búsqueda')
+
+if check_sort:
+    df_selec = df_selec.sort_values('Titulo').reset_index(drop=True)
+
 
 selec = st.sidebar.selectbox(
     'Título', options=df_selec.Titulo, key='box')
@@ -153,13 +180,16 @@ selec = st.sidebar.selectbox(
 selec_film = df_selec[df_selec['Titulo'] == st.session_state.box]
 
 # Sidebar: botones Next / Foward
-sd_col1, sd_col2 = st.sidebar.columns(2)
+sd_col1, sd_col2, sd_col3 = st.sidebar.columns([0.25, 0.25, 0.5])
 
 with sd_col1:
     back = st.button(label=':arrow_backward:', on_click=click_back)
 
 with sd_col2:
     fowd = st.button(label=':arrow_forward:', on_click=click_fowd)
+
+with sd_col3:
+    sort = st.toggle('Ordenar A-Z', key='sort')
 
 check_vista = st.sidebar.checkbox('Vista', key='vista',
                                   on_change=change_vista,
@@ -183,6 +213,11 @@ with st.sidebar.expander('Mas filtros'):
 
     # Filtro Vista/No vista
     toggle_vista = st.toggle('No vistas', key='toggle_vista')
+
+    # Filtro nota
+    nota = st.slider(label='Valoración', min_value=0,
+                     max_value=10, key='nota',
+                     value=[0, 10])
 
     # Filtro año
     slider_year = st.slider(label='Año', min_value=films.Year.min(),
