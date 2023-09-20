@@ -109,7 +109,16 @@ def get_video(TMDB_id):
         video = 'https://www.youtube.com/watch?v=' + \
             response['results'][0]['key']
     except:
-        return ''
+        try:
+            url = f"https://api.themoviedb.org/3/movie/{TMDB_id}/videos?language=EN"
+
+            response = requests.get(url, headers=headers).json()
+
+            video = 'https://www.youtube.com/watch?v=' + \
+                response['results'][0]['key']
+
+        except:
+            return ''
 
     return video
 
@@ -171,4 +180,25 @@ def solve_data(index, TMDB_id):
 
     films.loc[index, :] = dictio
 
+    films.to_parquet('films.parquet', engine='pyarrow')
+
+
+def clean_scan(id_scan, TMDB_id):
+
+    scan = pd.read_parquet('scan.parquet')
+
+    lst = []
+    for i_scan, i_TMBD in zip(id_scan, TMDB_id):
+        dictio = get_data(i_TMBD)
+        dictio['Folder'] = 0
+        dictio['File'] = scan.loc[i_scan, 'File']
+        dictio['Vista'] = False
+        dictio['Add'] = datetime.today().date().strftime('%d-%m-%Y')
+        lst.append(dictio)
+        scan.loc[i_scan, 'API_pass'] = True
+
+    scan.to_parquet('scan.parquet', engine='pyarrow')
+    films = pd.read_parquet('films.parquet')
+    new = pd.DataFrame(lst)
+    films = pd.concat([films, new], axis=0).reset_index(drop=True)
     films.to_parquet('films.parquet', engine='pyarrow')

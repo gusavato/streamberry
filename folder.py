@@ -1,14 +1,13 @@
 import os
 import re
 import pandas as pd
-from password import FOLDER
 
 """
 Funciones de escaneo de las ubiciones de los archivos
 """
 
 
-def extract_nyf():
+def extract_nyf(fold):
     """
     Función que extrae le nombre, año ,formato y nombre del archivo, para cada
     uno de los archivos ubicados en FOLDER
@@ -26,7 +25,7 @@ def extract_nyf():
 
     # Establecemos que se revisen solo los ficheros no registrados
     set_1 = set(scan.File)
-    set_2 = set(os.listdir(FOLDER))
+    set_2 = set(os.listdir(fold))
     set_to_scan = set_2.difference(set_1)
 
     # Extraemos información
@@ -54,13 +53,13 @@ def extract_nyf():
     return new_movies
 
 
-def insert_scan():
+def insert_scan(fold):
     """
     Función para insertar nueva información en scan.parquet 
     """
     scan = pd.read_parquet('scan.parquet')
 
-    extract = pd.DataFrame(extract_nyf(), columns=scan.columns)
+    extract = pd.DataFrame(extract_nyf(fold), columns=scan.columns)
 
     if extract.empty:
         return None

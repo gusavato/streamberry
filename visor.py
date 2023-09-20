@@ -200,7 +200,7 @@ st.sidebar.image(selec_film.Poster.values[0], width=250)
 # Filtros
 
 # Géneros
-selec_gen = st.sidebar.multiselect('Género', options=df_selec.Genero.explode().sort_values().unique(),
+selec_gen = st.sidebar.multiselect('Género', options=films.Genero.explode().sort_values().unique(),
                                    key='genero')
 
 # Búsqueda
@@ -325,10 +325,11 @@ with col_21:
                     unsafe_allow_html=True)
         ubi = {0: 'Emule',
                1: 'My Passport',
-               2: 'Pelis 3TB'}
+               2: 'Pelis WD Elements'}
         st.write(
             f"{ubi.get(selec_film.Folder.values[0])}:")
-        st.write(f"{selec_film.File.values[0]}")
+        st.write(
+            f"{selec_film.File.values[0][:40]}...{selec_film.File.values[0][-3:]}")
 
     st.divider()
 
