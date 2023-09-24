@@ -323,13 +323,13 @@ with col_21:
             <h3 style='font-size: 20px; color: #f55742;'>Ubicación:</h3>
             """,
                     unsafe_allow_html=True)
-        ubi = {0: 'Emule',
-               1: 'My Passport',
-               2: 'Pelis WD Elements'}
+        ubi = {'E:\Emule': 'Emule',
+               'F:\\': 'My Passport',
+               'G:\Pelis WD Elements': 'Pelis WD Elements'}
         st.write(
-            f"{ubi.get(selec_film.Folder.values[0])}:")
+            f"{ubi.get(selec_film.Root.values[0],'None')}:")
         st.write(
-            f"{selec_film.File.values[0][:40]}...{selec_film.File.values[0][-3:]}")
+            f"{selec_film.Folder.values[0]}//{selec_film.File.values[0][:60]}...{selec_film.File.values[0][-3:]}")
 
     st.divider()
 

@@ -34,21 +34,30 @@ def get_details(TMDB_id):
     dictio = dict()
     dictio['Titulo'] = response['title']
     dictio['Titulo_Original'] = response['original_title']
-    dictio['Year'] = datetime.strptime(
-        response['release_date'], '%Y-%m-%d').year
+    try:
+        dictio['Year'] = datetime.strptime(
+            response['release_date'], '%Y-%m-%d').year
+    except:
+        dictio['Year'] = 0
     dictio['Duracion'] = response['runtime']
     dictio['Tag_Line'] = response['tagline']
     dictio['Sinopsis'] = response['overview']
     dictio['Genero'] = [gen['name'] for gen in response['genres']]
     dictio['TMDB_rate'] = response['vote_average']
-    dictio['Poster'] = 'https://image.tmdb.org/t/p/w400' + \
-        response['poster_path']
+    try:
+        dictio['Poster'] = 'https://image.tmdb.org/t/p/w400' + \
+            response['poster_path']
+    except:
+        dictio['Poster'] = ''
     dictio['Productoras'] = [prod['name']
                              for prod in response['production_companies']]
     dictio['Pais'] = [country['iso_3166_1']
                       for country in response['production_countries']]
-    dictio['Fecha_Estreno'] = datetime.strptime(
-        response['release_date'], '%Y-%m-%d').strftime('%d-%m-%Y')
+    try:
+        dictio['Fecha_Estreno'] = datetime.strptime(
+            response['release_date'], '%Y-%m-%d').strftime('%d-%m-%Y')
+    except:
+        dictio['Fecha_Estreno'] = '01-01-1900'
     dictio['TMDB_id'] = response['id']
     dictio['IMDB_id'] = response['imdb_id']
 
@@ -136,24 +145,24 @@ def get_data(TMDB_id):
     return dictio
 
 
-def save_data():
+def save_data(df):
     """
     Función que almacena la nueva información en films.parquet
 
     """
 
     scan = pd.read_parquet('scan.parquet')
-    files = scan[scan.API_pass == False]
 
     lst = []
-    for i in files.itertuples():
+    for i in df.itertuples():
         try:
             TMDB_id = search_id(i[1], i[2])
         except:
             continue
         dictio = get_data(TMDB_id)
-        dictio['Folder'] = 0
-        dictio['File'] = i[4]
+        dictio['Root'] = i[3]
+        dictio['Folder'] = i[4]
+        dictio['File'] = i[5]
         dictio['Vista'] = False
         dictio['Add'] = datetime.today().date().strftime('%d-%m-%Y')
         lst.append(dictio)

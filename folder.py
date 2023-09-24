@@ -12,10 +12,15 @@ def root_file(fold):
     for raiz, _, archivos in os.walk(fold):
         for archivo in archivos:
             if archivo[-3:] in ['mkv', 'avi']:
+                dictio = dict()
 
-                lst.append({raiz.replace(fold, '').replace('\\', ''): archivo})
+                dictio['Root'] = fold
+                dictio['Folder'] = raiz.replace(fold, '').replace('\\', '')
+                dictio['File'] = archivo
 
-    return lst
+                lst.append(dictio)
+
+    return pd.DataFrame(lst)
 
 
 def extract_nyf(fold):
@@ -37,9 +42,9 @@ def extract_nyf(fold):
     # Establecemos que se revisen solo los ficheros no registrados
     set_1 = set(scan.File)
 
-    lst = root_file(fold)
+    df = root_file(fold)
 
-    set_2 = set([a for dicc in lst for a in dicc.values()])
+    set_2 = set(df.File)
     set_to_scan = set_2.difference(set_1)
 
     # Extraemos información
@@ -56,18 +61,24 @@ def extract_nyf(fold):
         except:
             year = ''
 
-        new_movies.append((name, year, ext, _file, False))
+        dictio = dict()
+        dictio['Titulo'] = name
+        dictio['Year'] = year
+        dictio['Root'] = fold
+        dictio['Folder'] = df[df.File == _file]['Folder'].values[0]
+        dictio['File'] = _file
+        dictio['API_pass'] = False
 
-    return new_movies
+        new_movies.append(dictio)
+
+    return pd.DataFrame(new_movies)
 
 
 def insert_scan(fold):
     """
     Función para insertar nueva información en scan.parquet 
     """
-    scan = pd.read_parquet('scan.parquet')
-
-    extract = pd.DataFrame(extract_nyf(fold), columns=scan.columns)
+    extract = extract_nyf(fold)
 
     if extract.empty:
         return None
