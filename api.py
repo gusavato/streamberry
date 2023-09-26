@@ -179,10 +179,16 @@ def save_data(df):
     films.to_parquet('films.parquet', engine='pyarrow')
 
 
-def solve_data(index, TMDB_id):
+def solve_data(index, TMDB_id=None):
+    """
+    Función que permite dado el indice corregir una entrada en 
+    films.parquet
+    """
     films = pd.read_parquet('films.parquet')
+    if TMDB_id is None:
+        TMDB_id = films.loc[index, 'TMDB_id']
     dictio = get_data(TMDB_id)
-    dictio['Folder'] = 0
+    dictio['Folder'] = films.loc[index, 'File']
     dictio['File'] = films.loc[index, 'File']
     dictio['Vista'] = films.loc[index, 'Vista']
     dictio['Add'] = films.loc[index, 'Add']
