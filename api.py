@@ -241,3 +241,11 @@ def insert_data(id_scan, TMDB_id):
 
     films.to_parquet('films.parquet', engine='pyarrow')
     scan.to_parquet('scan.parquet', engine='pyarrow')
+
+
+def delete_film(film_index):
+    films = pd.read_parquet('films.parquet')
+
+    films = films.drop(index=film_index).reset_index(drop=True)
+
+    films.to_parquet('films.parquet', engine='pyarrow')
