@@ -209,7 +209,7 @@ search_select = st.sidebar.radio(label='Opción', horizontal=True, options=[
                                  'Titulo', 'Reparto', 'Director'],
                                  key='search_select')
 
-with st.sidebar.expander('Mas filtros'):
+with st.sidebar.expander('Mas filtros', expanded=True):
 
     # Filtro Vista/No vista
     toggle_vista = st.toggle('No vistas', key='toggle_vista')

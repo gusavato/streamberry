@@ -217,3 +217,27 @@ def clean_scan(id_scan, TMDB_id):
     new = pd.DataFrame(lst)
     films = pd.concat([films, new], axis=0).reset_index(drop=True)
     films.to_parquet('films.parquet', engine='pyarrow')
+
+
+def insert_data(id_scan, TMDB_id):
+    """
+    Función para introducir manualmente datos en films.parquet. Se introduce
+    el ínidce en el dataframe scan, y se indica el id correcto de TMDB
+    """
+    scan = pd.read_parquet('scan.parquet')
+
+    dictio = get_data(TMDB_id)
+    dictio['Root'] = scan.loc[id_scan, 'Root']
+    dictio['Folder'] = scan.loc[id_scan, 'Folder']
+    dictio['File'] = scan.loc[id_scan, 'File']
+    dictio['Vista'] = False
+    dictio['Add'] = datetime.today().date().strftime('%d-%m-%Y')
+
+    scan.loc[id_scan, 'API_pass'] = True
+
+    films = pd.read_parquet('films.parquet')
+    films = pd.concat([films, pd.DataFrame([dictio])],
+                      axis=0).reset_index(drop=True)
+
+    films.to_parquet('films.parquet', engine='pyarrow')
+    scan.to_parquet('scan.parquet', engine='pyarrow')

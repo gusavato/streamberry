@@ -2,9 +2,6 @@
 password.py
 /pelis
 draft.ipynb
-scan.parquet
-actors.parquet
-films.parquet
 visor_control.ipynb
 
 # Byte-compiled / optimized / DLL files
