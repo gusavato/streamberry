@@ -188,7 +188,8 @@ def solve_data(index, TMDB_id=None):
     if TMDB_id is None:
         TMDB_id = films.loc[index, 'TMDB_id']
     dictio = get_data(TMDB_id)
-    dictio['Folder'] = films.loc[index, 'File']
+    dictio['Root'] = films.loc[index, 'Root']
+    dictio['Folder'] = films.loc[index, 'Folder']
     dictio['File'] = films.loc[index, 'File']
     dictio['Vista'] = films.loc[index, 'Vista']
     dictio['Add'] = films.loc[index, 'Add']
