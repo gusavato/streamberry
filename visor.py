@@ -7,7 +7,7 @@ from unidecode import unidecode
 
 def click_back():
     global df_selec
-    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[0]
+    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[-1]
     if index == 0:
         index = df_selec.shape[0]
     st.session_state.box = df_selec.loc[index - 1, 'Titulo']
@@ -17,7 +17,7 @@ def click_back():
 
 def click_fowd():
     global df_selec
-    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[0]
+    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[-1]
     if index == df_selec.shape[0]-1:
         index = -1
     st.session_state.box = df_selec.loc[index + 1, 'Titulo']
@@ -170,7 +170,6 @@ if df_selec.empty:
 
 if check_sort:
     df_selec = df_selec.sort_values('Titulo').reset_index(drop=True)
-
 
 selec = st.sidebar.selectbox(
     'Título', options=df_selec.Titulo, key='box')
