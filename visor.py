@@ -324,7 +324,7 @@ with col_21:
             """,
                     unsafe_allow_html=True)
         ubi = {'E:\Emule': 'Emule',
-               'F:\\': 'My Passport',
+               r'F:\\': 'My Passport',
                'G:\Pelis WD Elements': 'Pelis WD Elements'}
         st.write(
             f"{ubi.get(selec_film.Root.values[0],'None')}:")

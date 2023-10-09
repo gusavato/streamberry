@@ -159,7 +159,10 @@ def save_data(df):
             TMDB_id = search_id(i[1], i[2])
         except:
             continue
-        dictio = get_data(TMDB_id)
+        try:
+            dictio = get_data(TMDB_id)
+        except:
+            continue
         dictio['Root'] = i[3]
         dictio['Folder'] = i[4]
         dictio['File'] = i[5]
