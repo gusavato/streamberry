@@ -28,8 +28,8 @@ def click_fowd():
 def change_vista():
     global selec
     films_2 = pd.read_parquet('films.parquet')
-    if films_2.loc[selec_film.old_index.values[0], 'Vista'] != st.session_state.vista:
-        films_2.loc[selec_film.old_index.values[0],
+    if films_2.loc[selec_film.old_index, 'Vista'] != st.session_state.vista:
+        films_2.loc[selec_film.old_index,
                     'Vista'] = st.session_state.vista
         films_2.to_parquet('films.parquet', engine='pyarrow')
         st.session_state.toggle_vista = False
@@ -178,10 +178,7 @@ selec = st.sidebar.selectbox(
 
 # Definimos selección
 selec_film = df_selec.loc[st.session_state.box[0]]
-st.write(len(tuple_list) - 1)
-st.session_state.box[0]
-selec_film
-df_selec
+
 # Sidebar: botones Next / Foward
 sd_col1, sd_col2, sd_col3 = st.sidebar.columns([0.25, 0.25, 0.5])
 
