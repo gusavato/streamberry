@@ -6,21 +6,21 @@ from unidecode import unidecode
 
 
 def click_back():
-    global df_selec
-    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[-1]
+    index = st.session_state.box[0]
     if index == 0:
-        index = df_selec.shape[0]
-    st.session_state.box = df_selec.loc[index - 1, 'Titulo']
+        st.session_state.box = tuple_list[-1]
+    else:
+        st.session_state.box = tuple_list[index - 1]
     if len(gen_var) < 4:
         st.session_state.genero = gen_var
 
 
 def click_fowd():
-    global df_selec
-    index = df_selec[df_selec['Titulo'] == selec].index.to_list()[-1]
-    if index == df_selec.shape[0]-1:
-        index = -1
-    st.session_state.box = df_selec.loc[index + 1, 'Titulo']
+    index = st.session_state.box[0]
+    if index == len(tuple_list) - 1:
+        st.session_state.box = tuple_list[0]
+    else:
+        st.session_state.box = tuple_list[index + 1]
     if len(gen_var) < 4:
         st.session_state.genero = gen_var
 
@@ -171,13 +171,17 @@ if df_selec.empty:
 if check_sort:
     df_selec = df_selec.sort_values('Titulo').reset_index(drop=True)
 
+tuple_list = [(i.Index, i.Titulo) for i in df_selec.itertuples()]
 selec = st.sidebar.selectbox(
-    'Título', options=df_selec.Titulo, key='box')
+    'Título', options=tuple_list, key='box')
 
 
 # Definimos selección
-selec_film = df_selec[df_selec['Titulo'] == st.session_state.box]
-
+selec_film = df_selec.loc[st.session_state.box[0]]
+st.write(len(tuple_list) - 1)
+st.session_state.box[0]
+selec_film
+df_selec
 # Sidebar: botones Next / Foward
 sd_col1, sd_col2, sd_col3 = st.sidebar.columns([0.25, 0.25, 0.5])
 
@@ -192,9 +196,9 @@ with sd_col3:
 
 check_vista = st.sidebar.checkbox('Vista', key='vista',
                                   on_change=change_vista,
-                                  value=selec_film.Vista.values[0])
+                                  value=selec_film.Vista)
 
-st.sidebar.image(selec_film.Poster.values[0], width=250)
+st.sidebar.image(selec_film.Poster, width=250)
 
 # Filtros
 
@@ -229,7 +233,7 @@ with st.sidebar.expander('Mas filtros', expanded=True):
                             value=[films.Duracion.min(), films.Duracion.max()])
 
     # Index
-    st.markdown(f'Index: {selec_film.old_index.values[0]}')
+    st.markdown(f'Index: {selec_film.old_index}')
 
 
 # PAGINA PRINCIPAL
@@ -241,22 +245,22 @@ col_01, col_02 = st.columns([0.4, 0.2])
 with col_01:
     st.markdown(
         f"""
-    <h1 style='font-size: 70px; color: #b82c16;'>{st.session_state.box}</h1>
+    <h1 style='font-size: 70px; color: #b82c16;'>{st.session_state.box[1]}</h1>
     """,
         unsafe_allow_html=True)
-    st.write(selec_film.Tag_Line.values[0])
+    st.write(selec_film.Tag_Line)
 
 with col_02:
     st.write("TMDB rate:")
     st.markdown(f"""
-        <h3 style='font-size: 50px; color: #e2e2a7;'>{selec_film.TMDB_rate.values[0]}</h3>
+        <h3 style='font-size: 50px; color: #e2e2a7;'>{selec_film.TMDB_rate}</h3>
         """, unsafe_allow_html=True)
 
 # Director, Año, Duración, Imdb
 col_11, col_12, col_13, col_14 = st.columns(4)
 
 with col_11:
-    for director in selec_film.Director.values[0]:
+    for director in selec_film.Director:
 
         st.markdown(f"""
         <h2 style='font-size: 20px;'>{director}</h2>
@@ -265,19 +269,19 @@ with col_11:
 
 with col_12:
     st.markdown(f"""
-        <h2 style='font-size: 20px;'>{selec_film.Year.values[0]}</h2>
+        <h2 style='font-size: 20px;'>{selec_film.Year}</h2>
         """,
                 unsafe_allow_html=True)
 
 with col_13:
     st.markdown(f"""
-        <h2 style='font-size: 20px;'>{selec_film.Duracion.values[0]} minutos</h2>
+        <h2 style='font-size: 20px;'>{selec_film.Duracion} minutos</h2>
         """,
                 unsafe_allow_html=True)
 
 with col_14:
     st.markdown(f"""
-        <a href=https://www.imdb.com/title/{selec_film.IMDB_id.values[0]} 
+        <a href=https://www.imdb.com/title/{selec_film.IMDB_id} 
         style='font-size: 25px; color: #e2b616;'>Imdb<a>
         """,
                 unsafe_allow_html=True)
@@ -292,7 +296,7 @@ with col_21:
         <h3 style='font-size: 20px; color: #f55742;'>Sinopsis</h3>
         """,
                 unsafe_allow_html=True)
-    st.write(selec_film.Sinopsis.values[0])
+    st.write(selec_film.Sinopsis)
 
     col_211, col_212, col_213 = st.columns([0.2, 0.2, 0.6])
 
@@ -303,7 +307,7 @@ with col_21:
             <h3 style='font-size: 20px; color: #f55742;'>Generos</h3>
             """,
                     unsafe_allow_html=True)
-        for gen in selec_film.Genero.values[0]:
+        for gen in selec_film.Genero:
             st.write(gen)
 
     # Paises
@@ -313,7 +317,7 @@ with col_21:
             """,
                     unsafe_allow_html=True)
 
-        for country in selec_film.Pais.values[0]:
+        for country in selec_film.Pais:
             st.write(country)
 
     # Ubicación
@@ -326,15 +330,15 @@ with col_21:
                r'F:\\': 'My Passport',
                'G:\Pelis WD Elements': 'Pelis WD Elements'}
         st.write(
-            f"{ubi.get(selec_film.Root.values[0],'None')}:")
+            f"{ubi.get(selec_film.Root,'None')}:")
         st.write(
-            f"{selec_film.Folder.values[0]}//{selec_film.File.values[0][:60]}...{selec_film.File.values[0][-3:]}")
+            f"{selec_film.Folder}//{selec_film.File[:60]}...{selec_film.File[-3:]}")
 
     st.divider()
 
     # Video
     try:
-        st.video(selec_film.Video.values[0], 'rb')
+        st.video(selec_film.Video, 'rb')
     except:
         pass
 
@@ -346,7 +350,7 @@ with col_21:
             """,
                     unsafe_allow_html=True)
 
-        for prod in selec_film.Productoras.values[0]:
+        for prod in selec_film.Productoras:
             st.write(prod)
 
     with col_232:
@@ -354,7 +358,7 @@ with col_21:
             <h3 style='font-size: 20px; color: #f55742;'>Fecha de Estreno</h3>
             """,
                     unsafe_allow_html=True)
-        st.write(selec_film.Fecha_Estreno.values[0])
+        st.write(selec_film.Fecha_Estreno)
 
     with col_233:
         st.markdown(f"""
@@ -362,7 +366,7 @@ with col_21:
             """,
                     unsafe_allow_html=True)
 
-        for writer in selec_film.Guion.values[0]:
+        for writer in selec_film.Guion:
             st.write(writer)
 
 # Titulo Original + Reparto
@@ -373,7 +377,7 @@ with col_22:
         """,
                 unsafe_allow_html=True)
 
-    st.markdown(f"### **{selec_film.Titulo_Original.values[0]}**")
+    st.markdown(f"### **{selec_film.Titulo_Original}**")
 
     st.divider()
 
@@ -382,7 +386,7 @@ with col_22:
         """,
                 unsafe_allow_html=True)
 
-    for act in selec_film.Reparto.values[0]:
+    for act in selec_film.Reparto:
         try:
             st.image(actors[actors.Id == act].Foto.values[0], width=50)
         except:
